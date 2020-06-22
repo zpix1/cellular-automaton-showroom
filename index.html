@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rule 110</title>
+    <title>1D Cellular Automaton</title>
 </head>
 <style>
     #canvas {
@@ -44,6 +44,10 @@
         border-collapse: collapse;
         text-align: center;
     }
+    ul {
+        margin: 0;
+        padding-left: 25px;
+    }
 </style>
 <body>
     <div class="container">
@@ -58,6 +62,32 @@
             <div>Rule table:</div><div id="ruletable"></div>
             <div>Start row: <select id="startrow" onchange="setStartRowName(this.value)"></select></div>
             <input type="button" value="Render" onclick="render()"/>
+            <div style="display: block; height: 10px;"></div>
+            <div>
+                Rules to try:
+                <ul>
+                    <li>
+                        110 - Turing-complete rule
+                    </li>
+                    <li>
+                        90, 54, 193, 18 - Triangles
+                    </li>
+                    <li>
+                        30 - Chaos
+                    </li>
+                    <li>
+                        62, 73, 54 - Structure?
+                    </li>
+                </ul>
+            </div>
+            <div>
+                Read more:
+                <a href="https://en.wikipedia.org/wiki/Elementary_cellular_automaton">Elementary cellular automaton (wiki)</a>
+            </div>
+            <div>
+                Made by:
+                <a href="https://github.com/zpix1">@zpix1</a>
+            </div>
         </div>
     </div>
 </body>
