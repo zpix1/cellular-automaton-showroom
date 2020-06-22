@@ -170,15 +170,19 @@
 
 
     function drawRow(row, depth) {
+        ctx.fillStyle = 'white';
         for (let i = 0; i < row.length; i++) {
             if (row[i] === 0) {
-                ctx.fillStyle = 'white';
-            } else {
-                ctx.fillStyle = 'black';
+                ctx.fillRect(i * CELL_SIZE, depth * CELL_SIZE, CELL_SIZE, CELL_SIZE);
             }
-            ctx.fillRect(i * CELL_SIZE, depth * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            ctx.fill();
         }
+        ctx.fillStyle = 'black';
+        for (let i = 0; i < row.length; i++) {
+            if (row[i] !== 0) {
+                ctx.fillRect(i * CELL_SIZE, depth * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+        }
+        ctx.fill();
     }
 
     function randomRow() {
