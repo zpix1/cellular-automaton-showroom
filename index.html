@@ -228,7 +228,21 @@
             startRow.splice(ROW_LENGTH / 2, 0, 1);
             return startRow;
         },
-        'random': randomRow
+        'random': randomRow,
+        'onlyZeros': () => {
+            let startRow = [];
+            for (let i = 0; i < ROW_LENGTH; i++) {
+                startRow.push(0);
+            }
+            return startRow;
+        },
+        'onlyOnes': () => {
+            let startRow = [];
+            for (let i = 0; i < ROW_LENGTH; i++) {
+                startRow.push(1);
+            }
+            return startRow;
+        },
     }
 
     function render() {
