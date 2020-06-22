@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule 110</title>
+</head>
+<style>
+    #canvas {
+        border: 1px solid black;
+    }
+    
+    .container {
+        display: flex;
+    }
+    
+    .column {
+        margin: 10px;
+        flex: 50%;
+    }
+
+    .header {
+        font-size: 30px;
+    }
+
+    .left {
+        flex: 0;
+    }
+
+    .right {
+        flex: 1;
+    }
+
+    .right > div {
+        margin-bottom: 10px;
+    }
+
+    .column {
+        margin: 10px;
+    }
+
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        text-align: center;
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="left column">
+            <canvas id="canvas">
+            </canvas>
+        </div>
+        <div class="right column">
+            <div class="header">Settings</div>
+            <div>Cell size: <input type="number" min="1" id="cellsize" onchange="setCellSize(+this.value)"/></div>
+            <div>Rule ID: <input type="number" min="0" max="255" id="ruleid" onchange="setRuleId(+this.value)"/></div>
+            <div>Rule table:</div><div id="ruletable"></div>
+            <div>Start row: <select id="startrow" onchange="setStartRowName(this.value)"></select></div>
+            <input type="button" value="Render" onclick="render()"/>
+        </div>
+    </div>
+</body>
+<script>
+    String.prototype.ljust = function (length, char) {
+        var fill = [];
+        while (fill.length + this.length < length) {
+            fill[fill.length] = char;
+        }
+        return fill.join('') + this;
+    }
+
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
+
+    const WIDTH = 1000;
+    const HEIGHT = 700;
+    const CAStates = [
+        "111",
+        "110",
+        "101",
+        "100",
+        "011",
+        "010",
+        "001",
+        "000"
+    ];
+
+    let CELL_SIZE;
+    let ROW_LENGTH = WIDTH / CELL_SIZE;
+    let MAX_DEPTH = HEIGHT / CELL_SIZE;
+    let RULE_ID;
+
+    function setRuleId(id) {
+        RULE_ID = id;
+        let table = document.getElementById('ruletable');
+        table.innerHTML = '';
+        document.getElementById('ruletable').appendChild(renderTable(getCAConfiguration(id)));
+    }
+    
+    function setCellSize(cellsize) {
+        CELL_SIZE = cellsize;
+        ROW_LENGTH = WIDTH / CELL_SIZE;
+        MAX_DEPTH = HEIGHT / CELL_SIZE;
+    }
+
+    function setStartRowName(name) {
+        START_ROW_NAME = name;
+        drawRow(startRowsGenerators[START_ROW_NAME](), 0);
+    }
+
+
+    function getCAConfiguration(id) {
+        let binary = id.toString(2).ljust(8, '0');
+        let configuration = {};
+        for (let i = 0; i < CAStates.length; i++) {
+            configuration[CAStates[i]] = binary[i].toString();
+        }
+        return configuration;
+    }
+
+    function renderTable(config) {
+        let table = document.createElement('table');
+        let row1 = document.createElement('tr');
+        for (let i = 0; i < 8; i++) {
+            let state = document.createElement('td');
+            state.innerText = CAStates[i];
+            row1.appendChild(state);
+        }
+        table.appendChild(row1);
+        let row2 = document.createElement('tr');
+        for (let i = 0; i < 8; i++) {
+            let result = document.createElement('td');
+            result.innerText = config[CAStates[i]];
+            row2.appendChild(result);
+        }
+        table.appendChild(row2);
+        return table;
+    }
+
+
+    function drawRow(row, depth) {
+        for (let i = 0; i < row.length; i++) {
+            if (row[i] === 0) {
+                ctx.fillStyle = 'white';
+            } else {
+                ctx.fillStyle = 'black';
+            }
+            ctx.fillRect(i * CELL_SIZE, depth * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            ctx.fill();
+        }
+    }
+
+    function randomRow() {
+        let ans = [];
+        for (let i = 0; i < ROW_LENGTH; i++) {
+            ans.push(Math.random() < 0.5 ? 0 : 1);
+        }
+        return ans;
+    }
+
+    function CAIteration(row, config) {
+        let nextRow = [ 0 ];
+        for (let i = 1; i < row.length - 1; i++) {
+            let state = row.slice(i - 1, i + 2).join('');
+            nextRow.push(+config[state]);
+        }
+        nextRow.push(0);
+        return nextRow;
+    }
+
+    let startRowsGenerators = {
+        'rightmostOne': () => {
+            let startRow = [];
+            for (let i = 0; i < ROW_LENGTH - 1; i++) {
+                startRow.push(0);
+            }
+            startRow.push(1);
+            return startRow;
+        },
+        'leftmostOne': () => {
+            let startRow = [];
+            startRow.push(1);
+            for (let i = 0; i < ROW_LENGTH - 1; i++) {
+                startRow.push(0);
+            }
+            return startRow;
+        },
+        'center': () => {
+            let startRow = [];
+            for (let i = 0; i < ROW_LENGTH - 1; i++) {
+                startRow.push(0);
+            }
+            startRow.splice(ROW_LENGTH / 2, 0, 1);
+            return startRow;
+        },
+        'random': randomRow
+    }
+
+    function render() {
+        let config = getCAConfiguration(RULE_ID);
+
+        let startRow = startRowsGenerators[START_ROW_NAME]();
+
+        let map = [ startRow ];
+        for (let i = 0; i < MAX_DEPTH; i++) {
+            drawRow(map[i], i);
+            map.push(CAIteration(map[i], config));
+        }
+    }
+    
+    function init() {
+        setRuleId(110);
+        setCellSize(5);
+        
+        START_ROW_NAME = Object.keys(startRowsGenerators)[0];
+
+        for (let k in startRowsGenerators) {
+            document.getElementById('startrow').options.add(new Option(k, k));
+        }
+        document.getElementById('ruleid').value = RULE_ID;
+        document.getElementById('cellsize').value = CELL_SIZE;
+        document.getElementById('startrow').value = START_ROW_NAME;
+
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+    }
+    init();
+
+</script>
+</html>
