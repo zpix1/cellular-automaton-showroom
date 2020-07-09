@@ -139,7 +139,6 @@
         drawRow(startRowsGenerators[START_ROW_NAME](), 0);
     }
 
-
     function getCAConfiguration(id) {
         let binary = id.toString(2).ljust(8, '0');
         let configuration = {};
@@ -194,12 +193,12 @@
     }
 
     function CAIteration(row, config) {
-        let nextRow = [ 0 ];
+        let nextRow = [ +config[ [ row[row.length - 1], row[0], row[1] ].join('') ] ];
         for (let i = 1; i < row.length - 1; i++) {
             let state = row.slice(i - 1, i + 2).join('');
             nextRow.push(+config[state]);
         }
-        nextRow.push(0);
+        nextRow.push( +config[ [ row[row.length - 2], row[row.length - 1], row[0] ].join('') ] );
         return nextRow;
     }
 
